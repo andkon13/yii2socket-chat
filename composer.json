@@ -14,7 +14,7 @@
   },
   "autoload": {
     "psr-4": {
-      "andkon\\yii2socket-chat\\": ""
+      "andkon\\yii2SocketChat\\": ""
     }
   }
 }
