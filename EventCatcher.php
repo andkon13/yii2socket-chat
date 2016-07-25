@@ -8,7 +8,7 @@
 
 namespace andkon\yii2SocketChat;
 
-use vendor\andkon\yii2SocketChat\Room;
+use andkon\yii2SocketChat\Room;
 use yii\base\Object;
 
 /**

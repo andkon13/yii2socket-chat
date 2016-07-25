@@ -1,6 +1,6 @@
 <?php
 
-namespace vendor\andkon\yii2SocketChat;
+namespace andkon\yii2SocketChat;
 
 use yii\db\ActiveRecord;
 

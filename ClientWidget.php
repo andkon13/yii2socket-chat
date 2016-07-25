@@ -10,7 +10,7 @@ namespace andkon\yii2SocketChat;
 
 use common\models\User;
 use common\modules\shop\models\Shop;
-use vendor\andkon\yii2SocketChat\Room;
+use andkon\yii2SocketChat\Room;
 use yii\helpers\Html;
 
 /**

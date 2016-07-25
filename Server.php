@@ -9,7 +9,6 @@
 namespace andkon\yii2SocketChat;
 
 use React\Socket\Connection;
-use vendor\andkon\yii2SocketChat\Room;
 
 /**
  * Class Server

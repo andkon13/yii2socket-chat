@@ -8,15 +8,14 @@
 
 namespace andkon\yii2SocketChat;
 
-use common\helpers\ArrayHelper;
+use yii\helpers\ArrayHelper;
 use common\modules\shop\models\Shop;
-use vendor\andkon\yii2SocketChat\Room;
 use yii\helpers\Html;
 
 /**
  * Class SellerWidget
  *
- * @package vendor\andkon\yii2SocketChat
+ * @package andkon\yii2SocketChat
  */
 class SellerWidget extends AbstractWidget
 {

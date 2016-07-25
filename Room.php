@@ -6,16 +6,15 @@
  * Time: 12:30
  */
 
-namespace vendor\andkon\yii2SocketChat;
+namespace andkon\yii2SocketChat;
 
-use andkon\yii2SocketChat\Server;
 use React\Socket\Connection;
 use yii\base\Model;
 
 /**
  * Class Room
  *
- * @package vendor\andkon\yii2SocketChat
+ * @package andkon\yii2SocketChat
  */
 class Room extends Model
 {
