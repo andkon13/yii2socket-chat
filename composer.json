@@ -12,7 +12,7 @@
   "require": {
     "react/socket": "^0.4.3"
   },
-  autoload": {
+  "autoload": {
     "psr-4": {
       "andkon\\yii2socket-chat\\": ""
     }
