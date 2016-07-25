@@ -1,5 +1,5 @@
 {
-  "name": "andkon/yii2SocketChat",
+  "name": "andkon/yii2socket-chat",
   "description": "Custommer to Saller Chat on php-sockets+cache+db for yii2. ",
   "minimum-stability": "dev",
   "license": "proprietary",
