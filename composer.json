@@ -1,0 +1,15 @@
+{
+  "name": "andkon/yii2SocketChat",
+  "description": "Custommer to Saller Chat on php-sockets+cache+db for yii2. ",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Andrey Konenkov",
+      "email": "andkon13@gmail.com"
+    }
+  ],
+  "require": {
+    "react/socket": "^0.4.3"
+  }
+}
