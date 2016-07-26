@@ -99,11 +99,17 @@ class Room extends Model
                 return null;
             }
 
-            $data            = $model->toArray();
-            $data['id']      = $model->hash;
-            $data['message'] = json_decode($model->messages);
-        } else {
+            $data             = $model->toArray();
+            $data['messages'] = json_decode($data['messages'], true);
+
+            $data['id'] = $model->hash;
+        } elseif (is_string($data)) {
+            $data       = json_decode($data, true);
             $data['id'] = $id;
+        }
+
+        if (!array_key_exists('messages', $data)) {
+            $data['messages'] = [];
         }
 
         $shop   = (array_key_exists('shop', $data)) ? Server::getConnectById($data['shop']) : null;
@@ -118,6 +124,11 @@ class Room extends Model
      */
     public static function initRoom($data)
     {
+        $room = self::findById($data['id']);
+        if ($room) {
+            $data = array_merge($room->toArray(), $data);
+        }
+
         \Yii::$app->getCache()->set($data['id'], $data);
     }
 
@@ -178,6 +189,8 @@ class Room extends Model
             $model->save();
             $data['last_update'] = date('Y-m-d H:i:s');
         }
+
+        $data = json_encode($data);
 
         return \Yii::$app->getCache()->set($this->id, $data);
     }

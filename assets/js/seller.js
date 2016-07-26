@@ -87,6 +87,7 @@ var chat = {
         return false;
     },
     setCurrentChat: function (id) {
+        this.currentChat = id;
         $(".chat > div").hide(0);
         $("#" + id).show(1);
     }
