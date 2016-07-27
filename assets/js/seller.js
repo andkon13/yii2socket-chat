@@ -67,12 +67,12 @@ var chat = {
                 console.log("Ошибка " + error.message);
                 chat.setList("Ошибка " + error.message);
             };
-
         }
     },
     echo: function (mess, room, name) {
         if (!$(this.list).find("#" + room).length) {
             $(this.list).append('<div onclick="chat.setCurrentChat(\'' + room + '\')" class="tab chat"><b>' + name + '</b><div id="' + room + '"></div></div>');
+            $(this.container).find('.response').show(0);
         }
         this.currentChat = room;
         $(this.list).find("#" + room).append(mess);

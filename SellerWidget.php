@@ -9,7 +9,6 @@
 namespace andkon\yii2SocketChat;
 
 use yii\helpers\ArrayHelper;
-use common\modules\shop\models\Shop;
 use yii\helpers\Html;
 
 /**
@@ -33,11 +32,14 @@ class SellerWidget extends AbstractWidget
         echo Html::button('Онлайн-чат', ['onclick' => 'chat.open()']);
         echo Html::beginTag($this->containerTag, $this->containerOptions);
         echo Html::tag('div', 'Загрузка', ['class' => 'list']);
+        echo Html::beginTag('div', ['style' => 'display: none;', 'class' => 'response']);
         echo Html::textarea('chat', '', ['class' => 'message']);
         echo Html::button('Отправить', ['class' => 'messSend']);
+        echo Html::endTag('div');
         echo Html::endTag($this->containerTag);
     }
 
+    /** @inheritdoc */
     protected function setCache()
     {
         $shopsIds = ArrayHelper::getColumn($this->user->shops, 'id');
