@@ -10,6 +10,7 @@ var chat = {
     socket: null,
     chatId: null,
     currentChat: null,
+    tabTemplate: '',
     open: function () {
         if (typeof clientChat != 'undefined') {
             this.chatId = clientChat.chatId;
@@ -45,7 +46,8 @@ var chat = {
 
             this.socket.onmessage = function (event) {
                 console.log("Получены данные " + event.data);
-                var messages = JSON.parse(event.data);
+                var data = JSON.parse(event.data);
+                var messages = data.messages;
                 var tpl = clientChat.messageTemplate.current || '';
                 var html = [];
                 var users = [];
@@ -54,8 +56,9 @@ var chat = {
                         html[messages[i].room] = '';
                         users[messages[i].room] = (messages[i].user != '') ? messages[i].user : 'Не авторизованный пользователь';
                     }
-                    html[messages[i].room] += tpl.replace('{message}', messages[i].text)
-                        .replace('{date}', messages[i].date);
+                    html[messages[i].room] += tpl
+                        .replace(/{message}/g, messages[i].text)
+                        .replace(/{date}/g, messages[i].date);
                 }
 
                 for (room in html) {
@@ -71,7 +74,11 @@ var chat = {
     },
     echo: function (mess, room, name) {
         if (!$(this.list).find("#" + room).length) {
-            $(this.list).append('<div onclick="chat.setCurrentChat(\'' + room + '\')" class="tab chat"><b>' + name + '</b><div id="' + room + '"></div></div>');
+            var tab = this.tabTemplate;
+            tab = tab
+                .replace(/{room}/g, room)
+                .replace(/{name}/g, name);
+            $(this.list).append(tab);
             $(this.container).find('.response').show(0);
         }
         this.currentChat = room;

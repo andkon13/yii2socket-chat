@@ -44,7 +44,8 @@ var chat = {
 
             this.socket.onmessage = function (event) {
                 console.log("Получены данные " + event.data);
-                var messages = JSON.parse(event.data);
+                var data = JSON.parse(event.data);
+                var messages = data.messages;
                 var tpl = clientChat.messageTemplate.current || '';
                 var html = '';
                 for (i in messages) {

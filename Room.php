@@ -86,7 +86,7 @@ class Room extends Model
      *
      * @return null|Room|static
      */
-    public static function findById($id)
+    public static function findById($id, $model = null)
     {
         if (null === $id) {
             return null;
@@ -94,7 +94,10 @@ class Room extends Model
 
         $data = \Yii::$app->getCache()->get($id);
         if (!$data) {
-            $model = ChatRoomBase::findOne(['hash' => $id]);
+            if (!$model) {
+                $model = ChatRoomBase::findOne(['hash' => $id]);
+            }
+
             if (!$model) {
                 return null;
             }
@@ -152,14 +155,14 @@ class Room extends Model
                 $this->clientConnect = Server::getConnectByUser($this->clientConnectId);
             }
             if ($this->clientConnect) {
-                Server::write(json_encode([$message]), $this->clientConnect);
+                Server::write(json_encode(['messages' => [$message]]), $this->clientConnect);
             }
 
             if (!$this->shopConnect && $this->seller_id) {
                 $this->shopConnect = Server::getConnectByUser($this->seller_id);
             }
             if ($this->shopConnect) {
-                Server::write(json_encode([$message]), $this->shopConnect);
+                Server::write(json_encode(['messages' => [$message]]), $this->shopConnect);
             }
         }
     }

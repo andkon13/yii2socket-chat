@@ -10,6 +10,7 @@ namespace andkon\yii2SocketChat;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\web\JsExpression;
 
 /**
  * Class SellerWidget
@@ -18,10 +19,13 @@ use yii\helpers\Html;
  */
 class SellerWidget extends AbstractWidget
 {
+    public $tabTemplate = '<div onclick=\"chat.setCurrentChat(\'{room}\')\" class=\"tab chat\"><b>{name}</b><div id=\"{room}\"></div></div>';
+
     public function init()
     {
         parent::init();
         SellerAssets::register($this->getView());
+        $this->getView()->registerJs(new JsExpression('chat.tabTemplate="' . $this->tabTemplate . '";'));
     }
 
     /**

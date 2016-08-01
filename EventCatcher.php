@@ -8,7 +8,6 @@
 
 namespace andkon\yii2SocketChat;
 
-use andkon\yii2SocketChat\Room;
 use yii\base\Object;
 
 /**
@@ -43,18 +42,19 @@ class EventCatcher extends Object
             }
 
             foreach ($room->shop_id as $shop_id) {
-                if (array_key_exists($shop_id, Server::$roomByShop)) {
-                    foreach (Server::$roomByShop[$shop_id] as $item) {
-                        $item              = Room::findById($item);
-                        $item->shopConnect = $event->connect;
-                        $room->messages    = array_merge($room->messages, $item->messages);
-                    }
+                $clientRooms = ChatRoomBase::find()->where(['shop_id' => $shop_id])
+                    ->andWhere('user_id is not null')
+                    ->all();
+                foreach ($clientRooms as $item) {
+                    $item              = Room::findById($item->hash, $item);
+                    $item->shopConnect = $event->connect;
+                    $room->messages    = array_merge($room->messages, $item->messages);
                 }
             }
         }
 
         if ($room && count($room->messages)) {
-            Server::write(json_encode($room->messages), $event->connect);
+            Server::write(json_encode(['messages' => $room->messages]), $event->connect);
         }
     }
 

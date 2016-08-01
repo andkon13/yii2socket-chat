@@ -64,6 +64,7 @@ class Server
         $this->loop = \React\EventLoop\Factory::create();
         $socket     = new \React\Socket\Server($this->loop);
         $socket->on('connection', function (Connection $conn) {
+        usleep(500);
             $info = $this->handshake($conn);
             echo print_r($info, true);
             $room = $this->registryConnect($conn, $info);
