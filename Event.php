@@ -7,6 +7,7 @@
  */
 
 namespace andkon\yii2SocketChat;
+use React\Socket\Connection;
 
 /**
  * Class Event
@@ -15,6 +16,7 @@ namespace andkon\yii2SocketChat;
  */
 class Event extends \yii\base\Event
 {
+    /** @var  Connection */
     public $connect;
     public $message;
     public $context;

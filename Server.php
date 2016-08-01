@@ -51,6 +51,7 @@ class Server
      * @var int
      */
     public $port = 1337;
+    public $host = '127.0.0.1';
     /**
      * @var \React\EventLoop\ExtEventLoop|\React\EventLoop\LibEventLoop|\React\EventLoop\LibEvLoop|\React\EventLoop\StreamSelectLoop
      */
@@ -64,7 +65,7 @@ class Server
         $this->loop = \React\EventLoop\Factory::create();
         $socket     = new \React\Socket\Server($this->loop);
         $socket->on('connection', function (Connection $conn) {
-        usleep(500);
+            usleep(500);
             $info = $this->handshake($conn);
             echo print_r($info, true);
             $room = $this->registryConnect($conn, $info);
@@ -86,7 +87,7 @@ class Server
             });
         });
 
-        $socket->listen($this->port);
+        $socket->listen($this->port, $this->host);
         self::$instance = $this;
     }
 
@@ -135,8 +136,8 @@ class Server
     }
 
     /**
-     * @param $conn
-     * @param $info
+     * @param Connection $conn
+     * @param            $info
      *
      * @return bool|null|Room|static
      */
@@ -434,5 +435,12 @@ class Server
     public function start()
     {
         $this->loop->run();
+    }
+
+    public static function clearConnects()
+    {
+        self::$connectsByUser = array_filter(self::$connectsByUser, function (Connection $conn) {
+            return $conn->isWritable();
+        });
     }
 }
