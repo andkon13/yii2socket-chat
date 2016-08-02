@@ -51,7 +51,7 @@ class Server
      * @var int
      */
     public $port = 1337;
-    public $host = '127.0.0.1';
+    public $host = '0.0.0.0';
     /**
      * @var \React\EventLoop\ExtEventLoop|\React\EventLoop\LibEventLoop|\React\EventLoop\LibEvLoop|\React\EventLoop\StreamSelectLoop
      */
