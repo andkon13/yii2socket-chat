@@ -48,7 +48,7 @@ abstract class AbstractWidget extends Widget
     {
         parent::init();
         $this->id = $this->getChatId();
-        $url      = \Yii::$app->getHomeUrl() . ':' . \Yii::$app->getComponents()['chat']['port'] ?? 1337;
+        $url      = \Yii::$app->params['appDomain'] . ':' . \Yii::$app->getComponents()['chat']['port'] ?? 1337;
         $url .= '/' . $this->id;
         $apponent = \Yii::t('app', $this->messageTemplate);
         $current  = \Yii::t('app', $this->messageTemplate, ['class' => $this->classUserMessage]);
