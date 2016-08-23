@@ -51,7 +51,7 @@ class Server
      * @var int
      */
     public $port = 1337;
-    public $host = '0.0.0.0';
+    public $listen_host = '0.0.0.0';
     /**
      * @var \React\EventLoop\ExtEventLoop|\React\EventLoop\LibEventLoop|\React\EventLoop\LibEvLoop|\React\EventLoop\StreamSelectLoop
      */
@@ -87,7 +87,7 @@ class Server
             });
         });
 
-        $socket->listen($this->port, $this->host);
+        $socket->listen($this->port, $this->listen_host);
         self::$instance = $this;
     }
 
