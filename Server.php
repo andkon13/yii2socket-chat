@@ -51,7 +51,7 @@ class Server
      * @var int
      */
     public $port = 1337;
-    public $host = '0.0.0.0';
+    public $listen_host = '0.0.0.0';
     /**
      * @var \React\EventLoop\ExtEventLoop|\React\EventLoop\LibEventLoop|\React\EventLoop\LibEvLoop|\React\EventLoop\StreamSelectLoop
      */
@@ -87,7 +87,7 @@ class Server
             });
         });
 
-        $socket->listen($this->port, $this->host);
+        $socket->listen($this->port, $this->listen_host);
         self::$instance = $this;
     }
 
@@ -115,7 +115,6 @@ class Server
                 break;
             }
         }
-
         $address      = explode(':', stream_socket_get_name($stream, true)); //получаем адрес клиента
         $info['ip']   = $address[0];
         $info['port'] = $address[1];
@@ -152,7 +151,10 @@ class Server
         }
 
         if (!$room->isShop) {
-            $userId                        = ($room->user_id) ? $room->user_id : $room->id;
+            $userId = ($room->user_id) ? $room->user_id : $room->id;
+            if (isset(self::$connectsByUser[$userId])) {
+                self::$connectsByUser[$userId]->close();
+            }
             self::$connectsByUser[$userId] = $conn;
             if (!array_key_exists($room->id, self::$connectsByRoom)) {
                 self::$connectsByRoom[$room->id] = ['user' => null, 'seller' => null];
@@ -168,6 +170,9 @@ class Server
                 self::$roomByShop[$room->shop_id][] = $room->id;
             }
         } else {
+            if (isset(self::$connectsByUser[$room->seller_id])) {
+                self::$connectsByUser[$room->seller_id]->close();
+            }
             self::$connectsByUser[$room->seller_id] = $conn;
             foreach ($room->shop_id as $shop_id) {
                 if (array_key_exists($shop_id, self::$roomByShop)) {
