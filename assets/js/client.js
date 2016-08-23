@@ -4,12 +4,16 @@
 
 
 var chat = {
+    connected: false,
     container: null,
     list: null,
     mess: null,
     socket: null,
     chatId: null,
     open: function () {
+        if (chat.connected) {
+            return false;
+        }
         if (typeof clientChat != 'undefined') {
             this.chatId = clientChat.chatId;
             this.container = $('#container_' + this.chatId);
@@ -22,11 +26,14 @@ var chat = {
             this.socket = new WebSocket("ws://" + clientChat.url);
 
             this.socket.onopen = function () {
+                chat.connected = true;
                 console.log("connected");
                 chat.setList('');
             };
 
             this.socket.onclose = function (event) {
+                chat.connected = false;
+
                 if (event.wasClean) {
                     console.log('Соединение закрыто чисто');
                 } else {
