@@ -11,6 +11,8 @@ var chat = {
     socket: null,
     chatId: null,
     userId: null,
+    statusContainer: null,
+    isTyping: false,
     open: function () {
         if (chat.connected) {
             return false;
@@ -19,6 +21,8 @@ var chat = {
             this.chatId = clientChat.chatId;
             this.userId = clientChat.user_id;
             this.container = $('#container_' + this.chatId);
+            this.statusContainer = $('.status', $(this.container));
+
             this.list = $('.list', $(this.container));
             this.mess = $('.message', $(this.container));
             $(this.container).on('click', '.messSend', function () {
@@ -26,6 +30,15 @@ var chat = {
             }).on('keyup', 'textarea', function (event) {
                 if (event.keyCode == 13) {
                     chat.send();
+                    chat.isTyping = false;
+                } else if (!chat.isTyping) {
+                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typing'}));
+                    chat.isTyping = true;
+                }
+            }).on('focusout', 'textarea', function () {
+                if (chat.isTyping) {
+                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typingOff'}));
+                    chat.isTyping = false;
                 }
             });
             $(this.container).show(1);
@@ -35,6 +48,7 @@ var chat = {
                 chat.connected = true;
                 console.log("connected");
                 chat.setList('');
+                $(chat.statusContainer).html('');
             };
 
             this.socket.onclose = function (event) {
@@ -47,7 +61,7 @@ var chat = {
                 }
 
                 if (event.code == 1006) {
-                    chat.setList('Соединение с сервером...');
+                    $(chat.statusContainer).html('Соединение с сервером...');
                     setTimeout('chat.open()', 3000);
                     return;
                 }
@@ -69,6 +83,11 @@ var chat = {
                         .addClass('chat-user__status--offline')
                         .html('Офлайн');
                 }
+                if (data.seller.typing) {
+                    $(chat.statusContainer).html('Печатает...');
+                } else {
+                    $(chat.statusContainer).html('');
+                }
 
                 var messages = data.messages;
                 var html = '';
@@ -81,7 +100,7 @@ var chat = {
 
             this.socket.onerror = function (error) {
                 console.log("Ошибка " + error.message);
-                chat.setList("Ошибка " + error.message);
+                $(chat.statusContainer).html("Ошибка " + error.message);
             };
 
         }

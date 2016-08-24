@@ -66,6 +66,11 @@ class Server
         $socket     = new \React\Socket\Server($this->loop);
         $socket->on('connection', function (Connection $conn) {
             $info = $this->handshake($conn);
+            if (!$info) {
+                $conn->close();
+
+                return false;
+            }
             echo print_r($info, true);
             $room = $this->registryConnect($conn, $info);
             \Yii::$app->trigger(self::EVENT_ON_CONNECT, (new Event(['connect' => $conn, 'context' => $room])));
@@ -82,7 +87,7 @@ class Server
                 \Yii::$app->trigger(self::EVENT_ON_EOF, (new Event(['connect' => $conn, 'context' => $room])));
             });
             $conn->on('error', function (Connection $conn) use ($room) {
-                \Yii::$app->trigger(self::EVENT_ON_ERROR, (new Event(['connect' => $conn,'context' => $room])));
+                \Yii::$app->trigger(self::EVENT_ON_ERROR, (new Event(['connect' => $conn, 'context' => $room])));
             });
         });
 
@@ -335,7 +340,7 @@ class Server
      */
     public static function write($message, $conn)
     {
-        if ($conn->isWritable()) {
+        if ($conn instanceof Connection && $conn->isWritable()) {
             $conn->write(
                 self::getInstance()->encode($message)
             );

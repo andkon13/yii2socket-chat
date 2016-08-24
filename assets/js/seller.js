@@ -11,6 +11,7 @@ var chat = {
     chatId: null,
     currentChat: null,
     tabTemplate: '',
+    isTyping: false,
     open: function () {
         if (typeof clientChat != 'undefined') {
             this.chatId = clientChat.chatId;
@@ -19,6 +20,19 @@ var chat = {
             this.mess = $('.message', $(this.container));
             $(this.container).on('click', '.messSend', function () {
                 chat.send();
+            }).on('keyup', 'textarea', function (event) {
+                if (event.keyCode == 13) {
+                    chat.send();
+                    chat.isTyping = false;
+                } else if (!chat.isTyping) {
+                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typing'}));
+                    chat.isTyping = true;
+                }
+            }).on('focusout', 'textarea', function () {
+                if (chat.isTyping) {
+                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typingOff'}));
+                    chat.isTyping = false;
+                }
             });
             $(this.container).show(1);
             this.socket = new WebSocket("ws://" + clientChat.url);

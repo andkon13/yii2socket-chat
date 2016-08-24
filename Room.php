@@ -228,9 +228,9 @@ class Room extends Model
             $this->seller_avatar = User::findOne($this->seller_id)->getAvatarUrl();
         }
 
-        $data = [];
-        $data['user']     = ['id' => $this->user_id, 'avatar' => $this->user_avatar, 'online' => false,];
-        $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->seller_avatar, 'online' => false];
+        $data             = [];
+        $data['user']     = ['id' => $this->user_id, 'avatar' => $this->user_avatar, 'online' => false, 'typing' => false];
+        $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->seller_avatar, 'online' => false, 'typing' => false];
         $data['messages'] = $messages;
         if (!$this->clientConnect && $this->clientConnectId) {
             $this->clientConnect    = Server::getConnectByUser($this->clientConnectId);
