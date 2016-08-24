@@ -59,9 +59,15 @@ var chat = {
                 console.log("Получены данные " + event.data);
                 var data = JSON.parse(event.data);
                 if (data.seller.online) {
-                    $('.chat-user__status').addClass('chat-user__status--online').html('Онлайн');
+                    $('.chat-user__status')
+                        .removeClass('chat-user__status--offline')
+                        .addClass('chat-user__status--online')
+                        .html('Онлайн');
                 } else {
-                    $('.chat-user__status').addClass('chat-user__status--offline').html('Офлайн');
+                    $('.chat-user__status')
+                        .removeClass('chat-user__status--offline')
+                        .addClass('chat-user__status--offline')
+                        .html('Офлайн');
                 }
 
                 var messages = data.messages;

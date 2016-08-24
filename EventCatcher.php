@@ -48,7 +48,14 @@ class EventCatcher extends Object
                 foreach ($clientRooms as $item) {
                     $item              = Room::findById($item->hash, $item);
                     $item->shopConnect = $event->connect;
-                    $room->messages    = array_merge($room->messages, $item->messages);
+                    if (isset(Server::$connectsByRoom[$item->id]['user'])) {
+                        $data                     = $item->prepareData([]);
+                        $data['seller']['online'] = true;
+                        // Отправляем данные что б сменить статус продавца
+                        Server::write(json_encode($data), Server::$connectsByRoom[$item->id]['user']);
+                    }
+
+                    $room->messages = array_merge($room->messages, $item->messages);
                 }
             }
         } elseif ($room) {
@@ -115,6 +122,29 @@ class EventCatcher extends Object
      */
     public function onClosed(Event $event)
     {
+        if ($event->context instanceof Room) {
+            $room = $event->context;
+            if ($room->isShop) {
+                foreach ($room->shop_id as $shopId) {
+                    if (array_key_exists($shopId, Server::$roomByShop)) {
+                        foreach (Server::$roomByShop[$shopId] as $roomId) {
+                            if (isset(Server::$connectsByRoom[$roomId]['user'])) {
+                                $clientRoom               = Room::findById($roomId);
+                                $data                     = $clientRoom->prepareData([]);
+                                $data['seller']['online'] = false;
+                                Server::write(json_encode($data), Server::$connectsByRoom[$roomId]['user']);
+                                unset(Server::$connectsByRoom[$roomId]['seller']);
+                            }
+                        }
+                    }
+                }
+            } else {
+                $data                   = $room->prepareData([]);
+                $data['user']['online'] = false;
+                Server::write(json_encode($data), Server::$connectsByRoom[$room->id]['seller']);
+                unset(Server::$connectsByRoom[$room->id]['user']);
+            }
+        }
     }
 
     /**

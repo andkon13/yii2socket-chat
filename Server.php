@@ -42,9 +42,9 @@ class Server
      */
     static public $roomByShop = [];
     /** @var Connection[] */
-    static protected $connectsByRoom = [];
+    static public $connectsByRoom = [];
     /** @var Connection[] */
-    static protected $connectsByUser = [];
+    static public $connectsByUser = [];
     /** @var Server */
     protected static $instance;
     /**
@@ -65,7 +65,6 @@ class Server
         $this->loop = \React\EventLoop\Factory::create();
         $socket     = new \React\Socket\Server($this->loop);
         $socket->on('connection', function (Connection $conn) {
-            usleep(500);
             $info = $this->handshake($conn);
             echo print_r($info, true);
             $room = $this->registryConnect($conn, $info);
@@ -76,14 +75,14 @@ class Server
                 echo print_r($data, true);
                 \Yii::$app->trigger(self::EVENT_ON_MESSAGE, (new Event(['message' => $data, 'connect' => $conn])));
             });
-            $conn->on('close', function (Connection $conn) {
-                \Yii::$app->trigger(self::EVENT_ON_CLOSED, (new Event(['connect' => $conn])));
+            $conn->on('close', function (Connection $conn) use ($room) {
+                \Yii::$app->trigger(self::EVENT_ON_CLOSED, (new Event(['connect' => $conn, 'context' => $room])));
             });
-            $conn->on('end', function (Connection $conn) {
-                \Yii::$app->trigger(self::EVENT_ON_EOF, (new Event(['connect' => $conn])));
+            $conn->on('end', function (Connection $conn) use ($room) {
+                \Yii::$app->trigger(self::EVENT_ON_EOF, (new Event(['connect' => $conn, 'context' => $room])));
             });
-            $conn->on('error', function (Connection $conn) {
-                \Yii::$app->trigger(self::EVENT_ON_ERROR, (new Event(['connect' => $conn])));
+            $conn->on('error', function (Connection $conn) use ($room) {
+                \Yii::$app->trigger(self::EVENT_ON_ERROR, (new Event(['connect' => $conn,'context' => $room])));
             });
         });
 

@@ -111,14 +111,6 @@ class Room extends Model
             $data['messages'] = json_decode($data['messages'], true);
 
             $data['id'] = $model->hash;
-
-            if ($data['user_id']) {
-                $data['user_avatar'] = User::findOne($data['user_id'])->getAvatarUrl();
-            }
-
-            if ($data['seller_id']) {
-                $data['seller_avatar'] = User::findOne($data['seller_id'])->getAvatarUrl();
-            }
         } elseif (is_string($data)) {
             $data       = json_decode($data, true);
             $data['id'] = $id;
@@ -228,9 +220,17 @@ class Room extends Model
      */
     public function prepareData($messages):array
     {
-        $data             = [];
+        if (!$this->user_avatar && $this->user_id) {
+            $this->user_avatar = User::findOne($this->user_id)->getAvatarUrl();
+        }
+
+        if (!$this->seller_avatar && $this->seller_id) {
+            $this->seller_avatar = User::findOne($this->seller_id)->getAvatarUrl();
+        }
+
+        $data = [];
         $data['user']     = ['id' => $this->user_id, 'avatar' => $this->user_avatar, 'online' => false,];
-        $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->user_avatar, 'online' => false];
+        $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->seller_avatar, 'online' => false];
         $data['messages'] = $messages;
         if (!$this->clientConnect && $this->clientConnectId) {
             $this->clientConnect    = Server::getConnectByUser($this->clientConnectId);
