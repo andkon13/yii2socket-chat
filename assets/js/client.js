@@ -10,17 +10,23 @@ var chat = {
     mess: null,
     socket: null,
     chatId: null,
+    userId: null,
     open: function () {
         if (chat.connected) {
             return false;
         }
         if (typeof clientChat != 'undefined') {
             this.chatId = clientChat.chatId;
+            this.userId = clientChat.user_id;
             this.container = $('#container_' + this.chatId);
             this.list = $('.list', $(this.container));
             this.mess = $('.message', $(this.container));
             $(this.container).on('click', '.messSend', function () {
                 chat.send();
+            }).on('keyup', 'textarea', function (event) {
+                if (event.keyCode == 13) {
+                    chat.send();
+                }
             });
             $(this.container).show(1);
             this.socket = new WebSocket("ws://" + clientChat.url);
@@ -52,12 +58,16 @@ var chat = {
             this.socket.onmessage = function (event) {
                 console.log("Получены данные " + event.data);
                 var data = JSON.parse(event.data);
+                if (data.seller.online) {
+                    $('.chat-user__status').addClass('chat-user__status--online').html('Онлайн');
+                } else {
+                    $('.chat-user__status').addClass('chat-user__status--offline').html('Офлайн');
+                }
+
                 var messages = data.messages;
-                var tpl = clientChat.messageTemplate.current || '';
                 var html = '';
                 for (i in messages) {
-                    html += tpl.replace('{message}', messages[i].text)
-                        .replace('{date}', messages[i].date);
+                    html += chat.renderMessage(messages[i], data);
                 }
 
                 chat.echo(html);
@@ -69,6 +79,26 @@ var chat = {
             };
 
         }
+    },
+    renderMessage: function (message, data) {
+        var tpl = '';
+        var avatar = '';
+        if (message.user_id == chat.userId) {
+            tpl = clientChat.messageTemplate.current || '';
+        } else {
+            tpl = clientChat.messageTemplate.apponent || '';
+        }
+
+        if (message.user_id == data.user.id) {
+            avatar = data.user.avatar;
+        } else {
+            avatar = data.seller.avatar;
+        }
+
+        message.date = message.date.substr(11, 5);
+        return tpl.replace('{message}', message.text)
+            .replace('{date}', message.date)
+            .replace('{avatar}', avatar);
     },
     echo: function (mess) {
         $(this.list).append(mess);

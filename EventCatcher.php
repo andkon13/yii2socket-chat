@@ -51,10 +51,26 @@ class EventCatcher extends Object
                     $room->messages    = array_merge($room->messages, $item->messages);
                 }
             }
+        } elseif ($room) {
+            $oldRoom = ChatRoomBase::findOne(
+                [
+                    'user_id'   => $room->user_id,
+                    'seller_id' => $room->seller_id,
+                    'shop_id'   => $room->shop_id,
+                ]
+            );
+            if ($oldRoom && $oldRoom->hash != $room->id) {
+                $oldRoom->hash = $room->id;
+                $oldRoom->save(true, ['hash']);
+                $room->messages = json_decode($oldRoom->messages, true);
+                $room->save();
+            }
         }
 
         if ($room && count($room->messages)) {
-            Server::write(json_encode(['messages' => $room->messages]), $event->connect);
+            $data = $room->prepareData($room->messages);
+
+            Server::write(json_encode($data), $event->connect);
         }
     }
 
@@ -78,11 +94,13 @@ class EventCatcher extends Object
             return false;
         }
 
+        $sellerId = null;
         if ($room->isShop && $event->message['room']) {
-            $room = Room::findById($event->message['room']);
+            $sellerId = $room->seller_id;
+            $room     = Room::findById($event->message['room']);
         }
 
-        $room->addMessage($event->message['message']);
+        $room->addMessage($event->message['message'], $sellerId);
     }
 
     /**

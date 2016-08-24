@@ -8,6 +8,7 @@
 
 namespace andkon\yii2SocketChat;
 
+use common\modules\user\models\User;
 use React\Socket\Connection;
 use yii\base\Model;
 
@@ -59,6 +60,10 @@ class Room extends Model
      */
     public $last_update;
 
+    public $user_avatar;
+
+    public $seller_avatar;
+
     /**
      * Room constructor.
      *
@@ -106,6 +111,14 @@ class Room extends Model
             $data['messages'] = json_decode($data['messages'], true);
 
             $data['id'] = $model->hash;
+
+            if ($data['user_id']) {
+                $data['user_avatar'] = User::findOne($data['user_id'])->getAvatarUrl();
+            }
+
+            if ($data['seller_id']) {
+                $data['seller_avatar'] = User::findOne($data['seller_id'])->getAvatarUrl();
+            }
         } elseif (is_string($data)) {
             $data       = json_decode($data, true);
             $data['id'] = $id;
@@ -117,7 +130,8 @@ class Room extends Model
 
         $shop   = (array_key_exists('shop', $data)) ? Server::getConnectById($data['shop']) : null;
         $client = (array_key_exists('client', $data)) ? Server::getConnectById($data['client']) : null;
-        $model  = new self($data, $shop, $client);
+
+        $model = new self($data, $shop, $client);
 
         return $model;
     }
@@ -136,33 +150,32 @@ class Room extends Model
     }
 
     /**
-     * @param $message
+     * @param string $message
+     * @param int    $sellerId
      */
-    public function addMessage($message)
+    public function addMessage($message, $sellerId)
     {
         if (!empty($message)) {
+            $user_id          = $sellerId ?? $this->user_id;
+            $user             = \common\models\User::findOne($user_id);
             $message          = [
-                'user_id' => $this->user_id,
-                'user'    => (string)\common\models\User::findOne($this->user_id),
+                'user_id' => $user_id,
+                'user'    => (string)$user,
                 'text'    => $message,
                 'date'    => date('Y-m-d H:i:s'),
                 'room'    => $this->id,
-                'shop_id' => $this->shop_id
+                'shop_id' => $this->shop_id,
             ];
             $this->messages[] = $message;
             $this->save(true);
-            if (!$this->clientConnect && $this->clientConnectId) {
-                $this->clientConnect = Server::getConnectByUser($this->clientConnectId);
-            }
+            $data = $this->prepareData([$message]);
+
             if ($this->clientConnect) {
-                Server::write(json_encode(['messages' => [$message]]), $this->clientConnect);
+                Server::write(json_encode($data), $this->clientConnect);
             }
 
-            if (!$this->shopConnect && $this->seller_id) {
-                $this->shopConnect = Server::getConnectByUser($this->seller_id);
-            }
             if ($this->shopConnect) {
-                Server::write(json_encode(['messages' => [$message]]), $this->shopConnect);
+                Server::write(json_encode($data), $this->shopConnect);
             }
         }
     }
@@ -206,5 +219,29 @@ class Room extends Model
         $this->clientConnectId = Server::getConnectId($connect);
         $this->save();
         $this->clientConnect = $connect;
+    }
+
+    /**
+     * @param $messages
+     *
+     * @return array
+     */
+    public function prepareData($messages):array
+    {
+        $data             = [];
+        $data['user']     = ['id' => $this->user_id, 'avatar' => $this->user_avatar, 'online' => false,];
+        $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->user_avatar, 'online' => false];
+        $data['messages'] = $messages;
+        if (!$this->clientConnect && $this->clientConnectId) {
+            $this->clientConnect    = Server::getConnectByUser($this->clientConnectId);
+            $data['user']['online'] = $this->clientConnect !== null;
+        }
+
+        if (!$this->shopConnect && $this->seller_id) {
+            $this->shopConnect        = Server::getConnectByUser($this->seller_id);
+            $data['seller']['online'] = $this->shopConnect !== null;
+        }
+
+        return $data;
     }
 }
