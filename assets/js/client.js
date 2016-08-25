@@ -13,6 +13,7 @@ var chat = {
     userId: null,
     statusContainer: null,
     isTyping: false,
+    isReconnect: true,
     open: function () {
         if (chat.connected) {
             return false;
@@ -25,23 +26,29 @@ var chat = {
 
             this.list = $('.list', $(this.container));
             this.mess = $('.message', $(this.container));
-            $(this.container).on('click', '.messSend', function () {
-                chat.send();
-            }).on('keyup', 'textarea', function (event) {
-                if (event.keyCode == 13) {
+            if(chat.isReconnect) {
+                $(this.container).on('click', '.messSend', function () {
                     chat.send();
-                    chat.isTyping = false;
-                } else if (!chat.isTyping) {
-                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typing'}));
-                    chat.isTyping = true;
-                }
-            }).on('focusout', 'textarea', function () {
-                if (chat.isTyping) {
-                    chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typingOff'}));
-                    chat.isTyping = false;
-                }
-            });
+                }).on('keyup', 'textarea', function (event) {
+                    if (event.keyCode == 13) {
+                        chat.send();
+                        chat.isTyping = false;
+                    } else if (!chat.isTyping) {
+                        chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typing'}));
+                        chat.isTyping = true;
+                    }
+                }).on('focusout', 'textarea', function () {
+                    if (chat.isTyping) {
+                        chat.socket.send(JSON.stringify({chatId: chat.chatId, message: '', event: 'typingOff'}));
+                        chat.isTyping = false;
+                    }
+                }).on('click', '.close', function () {
+                    chat.close();
+                });
+            }
             $(this.container).show(1);
+
+            chat.isReconnect = true;
             this.socket = new WebSocket("ws://" + clientChat.url);
 
             this.socket.onopen = function () {
@@ -60,6 +67,9 @@ var chat = {
                     console.log('Обрыв соединения'); // например, "убит" процесс сервера
                 }
 
+                if (!chat.isReconnect) {
+                    return;
+                }
                 if (event.code == 1006) {
                     $(chat.statusContainer).html('Соединение с сервером...');
                     setTimeout('chat.open()', 3000);
@@ -136,5 +146,11 @@ var chat = {
         $(this.mess).val('');
         this.socket.send(JSON.stringify({chatId: this.chatId, message: mess}));
         return false;
+    },
+    close: function () {
+        this.socket.close();
+        chat.isReconnect = false;
+        chat.connected = false;
+        console.log('closed');
     }
 }
