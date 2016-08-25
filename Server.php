@@ -53,9 +53,11 @@ class Server
     public $port = 1337;
     public $listen_host = '0.0.0.0';
     /**
-     * @var \React\EventLoop\ExtEventLoop|\React\EventLoop\LibEventLoop|\React\EventLoop\LibEvLoop|\React\EventLoop\StreamSelectLoop
+     * @var \React\EventLoop\StreamSelectLoop
      */
     protected $loop;
+    /** @var \React\Socket\Server */
+    protected $socket;
 
     /**
      * Server constructor.
@@ -92,6 +94,7 @@ class Server
         });
 
         $socket->listen($this->port, $this->listen_host);
+        $this->socket   = $socket;
         self::$instance = $this;
     }
 
@@ -102,6 +105,7 @@ class Server
      */
     public function handshake(Connection $connect)
     {
+        sleep(1);
         $info           = array();
         $stream         = $connect->getBuffer()->stream;
         $line           = fgets($stream);
@@ -444,6 +448,15 @@ class Server
     public function start()
     {
         $this->loop->run();
+    }
+
+    /**
+     *
+     */
+    public function stop()
+    {
+        $this->socket->shutdown();
+        $this->loop->stop();
     }
 
     public static function clearConnects()
