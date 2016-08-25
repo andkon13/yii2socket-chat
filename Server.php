@@ -450,6 +450,11 @@ class Server
         $this->loop->run();
     }
 
+    public function tick()
+    {
+        $this->loop->tick();
+    }
+    
     /**
      *
      */
