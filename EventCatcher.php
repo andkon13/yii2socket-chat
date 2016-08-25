@@ -59,17 +59,19 @@ class EventCatcher extends Object
                 }
             }
         } elseif ($room) {
-            $oldRoom = ChatRoomBase::findOne(
-                [
-                    'user_id'   => $room->user_id,
-                    'seller_id' => $room->seller_id,
-                    'shop_id'   => $room->shop_id,
-                ]
-            );
+            $oldRoom = ChatRoomBase::find()
+                ->where(
+                    [
+                        'user_id'   => $room->user_id,
+                        'seller_id' => $room->seller_id,
+                        'shop_id'   => $room->shop_id,
+                    ]
+                )
+                ->andWhere(['!=', 'hash', $room->id])
+                ->one();
             if ($oldRoom && $oldRoom->hash != $room->id) {
-                $oldRoom->hash = $room->id;
-                $oldRoom->save(true, ['hash']);
-                $room->messages = json_decode($oldRoom->messages, true);
+                $room->messages = array_merge($room->messages, json_decode($oldRoom->messages, true));
+                $oldRoom->delete();
                 $room->save();
             }
         }
