@@ -7,13 +7,14 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "chat_room".
  *
- * @property integer $id
- * @property string  $hash
- * @property integer $user_id
- * @property integer $shop_id
- * @property integer $seller_id
- * @property string  $messages
- * @property string  $last_update
+ * @property integer       $id
+ * @property string        $hash
+ * @property integer       $user_id
+ * @property integer       $shop_id
+ * @property integer       $seller_id
+ * @property string        $messages
+ * @property string        $last_update
+ * @property ChatMessage[] $chatMessages
  */
 class ChatRoomBase extends ActiveRecord
 {
@@ -52,5 +53,13 @@ class ChatRoomBase extends ActiveRecord
             'messages'    => 'Messages',
             'last_update' => 'Last Update',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getChatMessages()
+    {
+        return $this->hasMany(ChatMessage::className(), ['chat_room_id' => 'id']);
     }
 }

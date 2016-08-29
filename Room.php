@@ -99,6 +99,7 @@ class Room extends Model
 
         $data = \Yii::$app->getCache()->get($id);
         if (!$data) {
+            /** @var ChatRoomBase $model */
             if (!$model) {
                 $model = ChatRoomBase::findOne(['hash' => $id]);
             }
@@ -108,7 +109,7 @@ class Room extends Model
             }
 
             $data             = $model->toArray();
-            $data['messages'] = json_decode($data['messages'], true);
+            $data['messages'] = $model->chatMessages;
 
             $data['id'] = $model->hash;
         } elseif (is_string($data)) {
