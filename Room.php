@@ -165,10 +165,20 @@ class Room extends Model
 
             if ($this->clientConnect) {
                 Server::write(json_encode($data), $this->clientConnect);
+            } else {
+                \Yii::$app->trigger(
+                    Server::EVENT_MESSAGE_REQUEST_TO_SEND_OFFLINE,
+                    (new Event(['message' => $message, 'context' => 'toClient']))
+                );
             }
 
             if ($this->shopConnect) {
                 Server::write(json_encode($data), $this->shopConnect);
+            } else {
+                \Yii::$app->trigger(
+                    Server::EVENT_MESSAGE_REQUEST_TO_SEND_OFFLINE,
+                    (new Event(['message' => $message, 'context' => 'toShop']))
+                );
             }
         }
     }

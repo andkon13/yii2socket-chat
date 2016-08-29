@@ -37,6 +37,9 @@ class Server
      *
      */
     const EVENT_ON_ERROR = 'SocketChatOnError';
+
+    const EVENT_ON_CONNECTED = 'SocketOnConnected';
+    const EVENT_MESSAGE_REQUEST_TO_SEND_OFFLINE = 'MessageRequestToSendOffline';
     /**
      * @var array
      */
@@ -454,7 +457,7 @@ class Server
     {
         $this->loop->tick();
     }
-    
+
     /**
      *
      */

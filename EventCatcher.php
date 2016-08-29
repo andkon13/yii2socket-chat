@@ -36,7 +36,12 @@ class EventCatcher extends Object
     {
         /** @var Room $room */
         $room = $event->context;
-        if ($room && $room->isShop) {
+        if (!$room) {
+            return;
+        }
+
+        if ($room->isShop) {
+            $isShop = true;
             if (!is_array($room->shop_id)) {
                 $room->shop_id = [$room->shop_id];
             }
@@ -58,7 +63,8 @@ class EventCatcher extends Object
                     $room->messages = array_merge($room->messages, $item->messages);
                 }
             }
-        } elseif ($room) {
+        } else {
+            $isShop  = false;
             $oldRoom = ChatRoomBase::find()
                 ->where(
                     [
@@ -76,11 +82,16 @@ class EventCatcher extends Object
             }
         }
 
-        if ($room && count($room->messages)) {
+        if (count($room->messages)) {
             $data = $room->prepareData($room->messages);
 
             Server::write(json_encode($data), $event->connect);
         }
+
+        \Yii::$app->trigger(
+            Server::EVENT_ON_CONNECTED,
+            (new Event(['context' => ['room' => $room, 'isShop' => $isShop]]))
+        );
     }
 
     /**
