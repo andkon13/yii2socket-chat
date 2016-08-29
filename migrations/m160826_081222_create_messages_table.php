@@ -30,6 +30,8 @@ class m160826_081222_create_messages_table extends \yii\db\Migration
 
         $this->addForeignKey('chat_message_chat_room_chat_room_id_id', 'chat_message', ['chat_room_id'], 'chat_room', ['id']);
 
+        $this->dropColumn('chat_room', 'messages');
+
         return true;
     }
 
@@ -37,6 +39,7 @@ class m160826_081222_create_messages_table extends \yii\db\Migration
     public function safeDown()
     {
         $this->dropTable('chat_message');
+        $this->addColumn('chat_room', 'messages', 'jsonb');
 
         return true;
     }

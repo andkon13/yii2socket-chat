@@ -12,7 +12,6 @@ use yii\db\ActiveRecord;
  * @property integer       $user_id
  * @property integer       $shop_id
  * @property integer       $seller_id
- * @property string        $messages
  * @property string        $last_update
  * @property ChatMessage[] $chatMessages
  */
@@ -33,7 +32,6 @@ class ChatRoomBase extends ActiveRecord
     {
         return [
             [['user_id', 'shop_id', 'seller_id'], 'integer'],
-            [['messages'], 'string'],
             [['last_update'], 'safe'],
             [['hash'], 'string', 'max' => 50],
         ];

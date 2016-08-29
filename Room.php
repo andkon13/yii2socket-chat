@@ -196,16 +196,21 @@ class Room extends Model
         }, ARRAY_FILTER_USE_KEY);
 
         if (strtotime($data['last_update']) < strtotime('-10 MINUTES') || $dbSave) {
-            $model = ChatRoomBase::findOne(['hash' => $data['id']]);
+            $model = \Yii::$app->getDb()->cache(function () use ($id) {
+                return ChatRoomBase::findOne(['hash' => $data['id']]);
+            }, 60);
             if (!$model) {
                 $model       = new ChatRoomBase();
                 $model->hash = $data['id'];
             }
 
             $model->setAttributes($data);
-            $model->messages    = json_encode($model->messages);
             $model->last_update = date('Y-m-d H:i:s');
             $model->save();
+
+            $message = new ChatMessage();
+
+
             $data['last_update'] = date('Y-m-d H:i:s');
         }
 
