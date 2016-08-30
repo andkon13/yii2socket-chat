@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * @property integer       $shop_id
  * @property integer       $seller_id
  * @property string        $last_update
- * @property ChatMessage[] $chatMessages
+ * @property ChatMessageBase[] $chatMessages
  */
 class ChatRoomBase extends ActiveRecord
 {
