@@ -153,7 +153,7 @@ class Room extends Model
             $user             = \common\models\User::findOne($user_id);
             $message          = [
                 'user_id' => $user_id,
-                'user'    => (string)$user,
+                'user_name'    => (string)$user,
                 'text'    => $message,
                 'date'    => date('Y-m-d H:i:s'),
                 'room'    => $this->id,
@@ -183,6 +183,16 @@ class Room extends Model
         }
     }
 
+    protected function getObjectVars()
+    {
+        $data = get_object_vars($this);
+        $data = array_filter($data, function ($key) {
+            return !in_array($key, ['shopConnect', 'clientConnect']);
+        }, ARRAY_FILTER_USE_KEY);
+
+        return $data;
+    }
+
     /**
      * @param bool $dbSave
      *
@@ -190,29 +200,40 @@ class Room extends Model
      */
     public function save($dbSave = false)
     {
-        $data = get_object_vars($this);
-        $data = array_filter($data, function ($key) {
-            return !in_array($key, ['shopConnect', 'clientConnect']);
-        }, ARRAY_FILTER_USE_KEY);
+        $data = $this->getObjectVars();
 
-        if (strtotime($data['last_update']) < strtotime('-10 MINUTES') || $dbSave) {
-            $model = \Yii::$app->getDb()->cache(function () use ($id) {
-                return ChatRoomBase::findOne(['hash' => $data['id']]);
-            }, 60);
-            if (!$model) {
-                $model       = new ChatRoomBase();
-                $model->hash = $data['id'];
-            }
+        $model = \Yii::$app->getDb()->cache(function () use ($data) {
+            return ChatRoomBase::findOne(['hash' => $data['id']]);
+        }, 60);
+        if (!$model) {
+            $model       = new ChatRoomBase();
+            $model->hash = $data['id'];
+        }
 
+        if (strtotime($data['last_update']) < strtotime('-10 MINUTES')
+            || $dbSave
+            || $model->isNewRecord
+        ) {
             $model->setAttributes($data);
             $model->last_update = date('Y-m-d H:i:s');
             $model->save();
-
-            $message = new ChatMessage();
-
-
-            $data['last_update'] = date('Y-m-d H:i:s');
         }
+
+        $messages_data   = $data['messages'] ?? [];
+        $last_message_id = count($messages_data) - 1;
+        $last_message    = $messages_data[$last_message_id] ?? [];
+        if ($last_message && !($last_message['id'] ?? false)) {
+            $message                   = new ChatMessageBase();
+            $message->chat_room_id     = $model->id;
+            $message->setAttributes($last_message);
+            if ($message->save()) {
+                $this->messages[$last_message_id]['id'] = $message->id;
+
+                $data = $this->getObjectVars();
+            }
+        }
+
+        $data['last_update'] = date('Y-m-d H:i:s');
 
         $data = json_encode($data);
 

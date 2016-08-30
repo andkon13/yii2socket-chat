@@ -65,6 +65,7 @@ class EventCatcher extends Object
             }
         } else {
             $isShop  = false;
+            /** @var ChatRoomBase $oldRoom */
             $oldRoom = ChatRoomBase::find()
                 ->where(
                     [
@@ -76,7 +77,7 @@ class EventCatcher extends Object
                 ->andWhere(['!=', 'hash', $room->id])
                 ->one();
             if ($oldRoom && $oldRoom->hash != $room->id) {
-                $room->messages = array_merge($room->messages, json_decode($oldRoom->messages, true));
+                $room->messages = array_merge($room->messages, $oldRoom->chatMessages);
                 $oldRoom->delete();
                 $room->save();
             }

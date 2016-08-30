@@ -3,20 +3,21 @@
 namespace andkon\yii2SocketChat;
 
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "chat_message".
  *
- * @property integer  $id
- * @property integer  $chat_room_id
- * @property integer  $user_id
- * @property integer  $shop_id
- * @property string   $user_name
- * @property string   $text
- * @property string   $created
- * @property ChatRoom $chatRoom
+ * @property integer      $id
+ * @property integer      $chat_room_id
+ * @property integer      $user_id
+ * @property integer      $shop_id
+ * @property string       $user_name
+ * @property string       $text
+ * @property string       $created
+ * @property ChatRoomBase $chatRoom
  */
-class ChatMessage extends ActiveRecord
+class ChatMessageBase extends ActiveRecord
 {
     /**
      * @inheritdoc
@@ -40,7 +41,7 @@ class ChatMessage extends ActiveRecord
                 ['chat_room_id'],
                 'exist',
                 'skipOnError'     => true,
-                'targetClass'     => ChatRoom::className(),
+                'targetClass'     => ChatRoomBase::className(),
                 'targetAttribute' => ['chat_room_id' => 'id']
             ],
         ];
@@ -67,6 +68,15 @@ class ChatMessage extends ActiveRecord
      */
     public function getChatRoom()
     {
-        return $this->hasOne(ChatRoom::className(), ['id' => 'chat_room_id']);
+        return $this->hasOne(ChatRoomBase::className(), ['id' => 'chat_room_id']);
+    }
+
+    public function beforeSave($insert)
+    {
+        if ($insert) {
+            $this->created = new Expression("NOW()");
+        }
+
+        return parent::beforeSave($insert);
     }
 }

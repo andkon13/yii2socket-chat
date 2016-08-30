@@ -48,7 +48,6 @@ class ChatRoomBase extends ActiveRecord
             'user_id'     => 'User ID',
             'shop_id'     => 'Shop ID',
             'seller_id'   => 'Seller ID',
-            'messages'    => 'Messages',
             'last_update' => 'Last Update',
         ];
     }
@@ -58,6 +57,6 @@ class ChatRoomBase extends ActiveRecord
      */
     public function getChatMessages()
     {
-        return $this->hasMany(ChatMessage::className(), ['chat_room_id' => 'id']);
+        return $this->hasMany(ChatMessageBase::className(), ['chat_room_id' => 'id']);
     }
 }
