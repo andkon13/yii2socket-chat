@@ -28,7 +28,7 @@ class m160826_081222_create_messages_table extends \yii\db\Migration
         $this->createIndex('chat_message_user_id_shop_id_idx', 'chat_message', ['user_id', 'shop_id']);
         $this->createIndex('chat_message_user_id_shop_id_created_idx', 'chat_message', ['user_id', 'shop_id', 'created']);
 
-        $this->addForeignKey('chat_message_chat_room_chat_room_id_id', 'chat_message', ['chat_room_id'], 'chat_room', ['id']);
+        $this->addForeignKey('chat_message_chat_room_chat_room_id_id', 'chat_message', ['chat_room_id'], 'chat_room', ['id'], 'CASCADE', 'CASCADE');
 
         $this->dropColumn('chat_room', 'messages');
 

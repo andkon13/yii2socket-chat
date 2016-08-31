@@ -118,7 +118,7 @@ var chat = {
     renderMessage: function (message, data) {
         var tpl = '';
         var avatar = '';
-        if (message.user_id == chat.userId) {
+        if (message.user_id != data.seller.id) {
             tpl = clientChat.messageTemplate.current || '';
         } else {
             tpl = clientChat.messageTemplate.apponent || '';

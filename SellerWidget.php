@@ -62,13 +62,12 @@ class SellerWidget extends AbstractWidget
      */
     protected function getChatId()
     {
-        $cacheKey = __CLASS__ . 'sessionKeySeller';
-        $key      = \Yii::$app->getSession()->get($cacheKey);
+        $cacheKey = 'sessionKeySeller';
+        $key      = \Yii::$app->getRequest()->getCookies()->getValue($cacheKey);
         if (!$key) {
             $key = \Yii::$app->getSecurity()->generateRandomString(10);
+            \Yii::$app->getResponse()->getCookies()->add(new Cookie(['name' => $cacheKey, 'value' => $key]));
         }
-
-        \Yii::$app->getSession()->set($cacheKey, $key);
 
         return $key;
     }

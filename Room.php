@@ -152,12 +152,12 @@ class Room extends Model
             $user_id          = $sellerId ?? $this->user_id;
             $user             = \common\models\User::findOne($user_id);
             $message          = [
-                'user_id' => $user_id,
-                'user_name'    => (string)$user,
-                'text'    => $message,
-                'date'    => date('Y-m-d H:i:s'),
-                'room'    => $this->id,
-                'shop_id' => $this->shop_id,
+                'user_id'   => $user_id,
+                'user_name' => (string)$user,
+                'text'      => $message,
+                'date'      => date('Y-m-d H:i:s'),
+                'room'      => $this->id,
+                'shop_id'   => $this->shop_id,
             ];
             $this->messages[] = $message;
             $this->save(true);
@@ -200,11 +200,8 @@ class Room extends Model
      */
     public function save($dbSave = false)
     {
-        $data = $this->getObjectVars();
-
-        $model = \Yii::$app->getDb()->cache(function () use ($data) {
-            return ChatRoomBase::findOne(['hash' => $data['id']]);
-        }, 60);
+        $data  = $this->getObjectVars();
+        $model = ChatRoomBase::findOne(['hash' => $data['id']]);
         if (!$model) {
             $model       = new ChatRoomBase();
             $model->hash = $data['id'];
@@ -219,12 +216,12 @@ class Room extends Model
             $model->save();
         }
 
-        $messages_data   = $data['messages'] ?? [];
+        $messages_data   = $this->messageToArray($data['messages'] ?? []);
         $last_message_id = count($messages_data) - 1;
         $last_message    = $messages_data[$last_message_id] ?? [];
         if ($last_message && !($last_message['id'] ?? false)) {
-            $message                   = new ChatMessageBase();
-            $message->chat_room_id     = $model->id;
+            $message               = new ChatMessageBase();
+            $message->chat_room_id = $model->id;
             $message->setAttributes($last_message);
             if ($message->save()) {
                 $this->messages[$last_message_id]['id'] = $message->id;
@@ -268,7 +265,7 @@ class Room extends Model
         $data             = [];
         $data['user']     = ['id' => $this->user_id, 'avatar' => $this->user_avatar, 'online' => false, 'typing' => false];
         $data['seller']   = ['id' => $this->seller_id, 'avatar' => $this->seller_avatar, 'online' => false, 'typing' => false];
-        $data['messages'] = $messages;
+        $data['messages'] = $this->messageToArray($messages);
         if (!$this->clientConnect && $this->clientConnectId) {
             $this->clientConnect    = Server::getConnectByUser($this->clientConnectId);
             $data['user']['online'] = $this->clientConnect !== null;
@@ -280,5 +277,28 @@ class Room extends Model
         }
 
         return $data;
+    }
+
+    /**
+     * @param $messages
+     *
+     * @return array
+     */
+    protected function messageToArray($messages):array
+    {
+        $messages = array_map(function ($message) {
+            /** @var array|ChatMessageBase $message */
+            if ($message instanceof ChatMessageBase) {
+                $data         = $message->toArray();
+                $data['date'] = $message->created;
+            } else {
+                $data         = $message;
+                $data['date'] = $message['date'] ?? ($message['created'] ?? date('Y-m-d H:i:s'));
+            }
+
+            return $data;
+        }, $messages);
+
+        return $messages;
     }
 }

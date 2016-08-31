@@ -11,6 +11,7 @@ namespace andkon\yii2SocketChat;
 use common\modules\shop\models\Shop;
 use common\modules\user\models\User;
 use yii\base\Widget;
+use yii\web\Cookie;
 use yii\web\View;
 
 /**
@@ -49,8 +50,8 @@ abstract class AbstractWidget extends Widget
         parent::init();
         $this->id = $this->getChatId();
         $url      = (\Yii::$app->getComponents()['chat']['server_host'] ?? '127.0.0.1');
-        $url .=  ':';
-        $url .=  (\Yii::$app->getComponents()['chat']['port'] ?? 1337);
+        $url .= ':';
+        $url .= (\Yii::$app->getComponents()['chat']['port'] ?? 1337);
         $url .= '/' . $this->id;
         $apponent = \Yii::t('app', $this->messageTemplate);
         $current  = \Yii::t('app', $this->messageTemplate, ['class' => $this->classUserMessage]);
@@ -71,13 +72,12 @@ JS;
      */
     protected function getChatId()
     {
-        $cacheKey = __CLASS__ . 'sessionKey' . Shop::getCurrent()->id;
-        $key      = \Yii::$app->getSession()->get($cacheKey);
+        $cacheKey = 'sessionKey' . Shop::getCurrent()->id;
+        $key      = \Yii::$app->getRequest()->getCookies()->getValue($cacheKey);
         if (!$key) {
             $key = \Yii::$app->getSecurity()->generateRandomString(10);
+            \Yii::$app->getResponse()->getCookies()->add(new Cookie(['name' => $cacheKey, 'value' => $key]));
         }
-
-        \Yii::$app->getSession()->set($cacheKey, $key);
 
         return $key;
     }
