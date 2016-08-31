@@ -68,7 +68,7 @@ var chat = {
                 for (i in messages) {
                     if (typeof html[messages[i].room] == 'undefined') {
                         html[messages[i].room] = '';
-                        users[messages[i].room] = (messages[i].user != '') ? messages[i].user : 'Не авторизованный пользователь';
+                        users[messages[i].room] = (messages[i].user_name != '') ? messages[i].user_name : 'Не авторизованный пользователь';
                     }
                     html[messages[i].room] += tpl
                         .replace(/{message}/g, messages[i].text)
