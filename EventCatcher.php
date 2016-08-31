@@ -64,7 +64,7 @@ class EventCatcher extends Object
                 }
             }
         } else {
-            $isShop  = false;
+            $isShop = false;
             /** @var ChatRoomBase $oldRoom */
             $oldRoom = ChatRoomBase::find()
                 ->where(
@@ -149,10 +149,19 @@ class EventCatcher extends Object
 
                     Server::write(json_encode($data), $conn);
                     break;
+                case 'loadMessages':
+                    $room->loadMessages($event->message['days'] ?? false);
+                    $data = $room->prepareData($room->messages);
+                    Server::write(json_encode($data), $event->connect);
+                    break;
                 default:
                     return false;
             }
         } else {
+            if (array_key_exists('email', $event->message)) {
+                $room->userEmail = $event->message['email'];
+            }
+
             $room->addMessage($event->message['message'], $sellerId);
         }
     }

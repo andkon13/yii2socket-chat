@@ -11,6 +11,7 @@ var chat = {
     socket: null,
     chatId: null,
     userId: null,
+    userEmail: null,
     statusContainer: null,
     isTyping: false,
     isReconnect: true,
@@ -26,7 +27,7 @@ var chat = {
 
             this.list = $('.list', $(this.container));
             this.mess = $('.message', $(this.container));
-            if(chat.isReconnect) {
+            if (chat.isReconnect) {
                 $(this.container).on('click', '.messSend', function () {
                     chat.send();
                 }).on('keyup', 'textarea', function (event) {
@@ -87,11 +88,16 @@ var chat = {
                         .removeClass('chat-user__status--offline')
                         .addClass('chat-user__status--online')
                         .html('Онлайн');
+                    $('.chat-mail').show(1);
                 } else {
                     $('.chat-user__status')
                         .removeClass('chat-user__status--offline')
                         .addClass('chat-user__status--offline')
                         .html('Офлайн');
+                    if (chat.chatId == chat.userId && chat.userEmail == null) {
+                        // незалогиненый пользователь
+                        $('.chat-mail').show(1);
+                    }
                 }
                 if (data.seller.typing) {
                     $(chat.statusContainer).html('Печатает...');
@@ -144,7 +150,7 @@ var chat = {
     send: function () {
         var mess = $(this.mess).val();
         $(this.mess).val('');
-        this.socket.send(JSON.stringify({chatId: this.chatId, message: mess}));
+        this.socket.send(JSON.stringify({chatId: this.chatId, message: mess, email: this.userEmail}));
         return false;
     },
     close: function () {
@@ -152,5 +158,12 @@ var chat = {
         chat.isReconnect = false;
         chat.connected = false;
         console.log('closed');
+    },
+    getHistory: function (days) {
+        this.setList('');
+        this.socket.send(JSON.stringify({chatId: this.chatId, message: '', event: 'loadMessages', days: days}));
+    },
+    setEmail: function (email) {
+        this.userEmail = email;
     }
 }
