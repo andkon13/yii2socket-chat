@@ -10,6 +10,7 @@ namespace andkon\yii2SocketChat;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\web\Cookie;
 use yii\web\JsExpression;
 
 /**
